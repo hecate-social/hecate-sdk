@@ -1,0 +1,22 @@
+{application, hecate_sdk, [
+    {description, "Hecate Plugin SDK — the contract between daemon and plugins"},
+    {vsn, "0.1.0"},
+    {registered, []},
+    {applications, [
+        kernel,
+        stdlib,
+        crypto,
+        reckon_db,
+        reckon_gater,
+        evoq,
+        reckon_evoq,
+        cowboy,
+        esqlite,
+        hackney
+    ]},
+    {env, []},
+    {licenses, ["Apache-2.0"]},
+    {links, [
+        {"GitHub", "https://github.com/hecate-social/hecate-sdk"}
+    ]}
+]}.
