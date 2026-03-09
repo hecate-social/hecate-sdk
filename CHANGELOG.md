@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.2.0 — 2026-03-09
+
+- Add `flag_maps/0` callback to `hecate_plugin` behaviour
+  - Every plugin with CMD aggregates exposes its bit flag maps
+  - Daemon auto-mounts at `GET /plugin/{name}/api/flag-maps`
+  - Frontends decode raw status integers into labels
+- Add guide extras to ex_doc configuration
+
 ## 0.1.0 — 2026-03-09
 
 Initial release.
