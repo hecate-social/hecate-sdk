@@ -48,7 +48,9 @@
 %%   description          :: binary()
 %%   author               :: binary()
 %%   native_capabilities  :: map()  - Tauri permissions requested
-%%   icon                 :: binary()  - relative path in static_dir
+%%   icon                 :: binary()  - Lucide icon name for the plugin
+%%   group_name           :: binary()  - sidebar group label (e.g. <<"GAMES">>)
+%%   group_icon           :: binary()  - Lucide icon name for the sidebar group
 -callback manifest() -> map().
 
 %% Bit flag maps for this plugin's aggregates.
@@ -66,3 +68,15 @@
 %%       4 => <<"Archived">>
 %%   }}
 -callback flag_maps() -> #{binary() => evoq_bit_flags:flag_map()}.
+
+%% Optional: Plugin health status.
+%% Called by the daemon health endpoint to aggregate plugin health.
+%% Plugins that don't implement this are assumed healthy (ok).
+%%
+%% Return values:
+%%   ok        — plugin is fully functional
+%%   degraded  — plugin is running but with reduced capability
+%%   {unhealthy, Reason} — plugin is not functional
+-callback health() -> ok | degraded | {unhealthy, Reason :: binary()}.
+
+-optional_callbacks([health/0]).

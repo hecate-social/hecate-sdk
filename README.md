@@ -4,8 +4,9 @@ The contract between the Hecate daemon and plugins.
 
 Plugins are OTP applications that load into the daemon VM. The SDK provides:
 
-- **Platform dependencies** — pinned versions, one `{hecate_sdk, "0.1.0"}` dep
+- **Platform dependencies** — pinned versions, one `{hecate_sdk, "~> 0.4"}` dep
 - **Plugin behaviour** — `hecate_plugin` callbacks the daemon calls
+- **Observability** — structured JSON logging, metrics, health reporting (auto-wired)
 - **Helpers** — paths, store setup, cowboy routes, WebSocket, validation, scheduling, rate limiting, file I/O
 
 ## Quick Start
@@ -13,7 +14,7 @@ Plugins are OTP applications that load into the daemon VM. The SDK provides:
 ```erlang
 %% rebar.config
 {deps, [
-    {hecate_sdk, "0.1.0"}
+    {hecate_sdk, "~> 0.4"}
 ]}.
 ```
 
@@ -78,6 +79,9 @@ Plus OTP builtins: `json`, `ets`, `pg`, `logger`, `crypto`, `calendar`, `mnesia`
 | Module | Purpose |
 |--------|---------|
 | `hecate_plugin` | Behaviour definition |
+| `hecate_plugin_metrics` | Counters + gauges (lock-free) |
+| `hecate_plugin_telemetry` | Auto-attach to evoq/reckon-db events |
+| `hecate_plugin_logger` | JSON log formatter for OTP logger |
 | `hecate_plugin_paths` | Standard directory layout |
 | `hecate_plugin_store` | ReckonDB store creation + dispatch |
 | `hecate_plugin_cowboy` | Route prefixing + static serving |
@@ -86,6 +90,7 @@ Plus OTP builtins: `json`, `ets`, `pg`, `logger`, `crypto`, `calendar`, `mnesia`
 | `hecate_plugin_scheduler` | Cron-like recurring tasks |
 | `hecate_plugin_ratelimit` | Token bucket rate limiter |
 | `hecate_plugin_files` | Upload/download helpers |
+| `hecate_plugin_llm` | Capability-based LLM model selection |
 
 ## Frontend
 

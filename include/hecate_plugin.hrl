@@ -19,6 +19,27 @@
 }).
 
 %% SDK version — plugins can check at compile time.
--define(HECATE_SDK_VERSION, "0.1.0").
+-define(HECATE_SDK_VERSION, "0.4.0").
+
+%% -------------------------------------------------------------------
+%% Metrics macros
+%%
+%% Usage:
+%%   ?METRIC_INC(<<"api_requests">>)        — increment by 1
+%%   ?METRIC_ADD(<<"bytes_sent">>, 1024)     — increment by N
+%%   ?METRIC_SET(<<"queue_depth">>, Depth)   — set gauge value
+%%
+%% The plugin name is resolved from persistent_term at call site.
+%% The plugin loader sets this when loading the plugin.
+%% -------------------------------------------------------------------
+-define(METRIC_INC(Name),
+    hecate_plugin_metrics:counter(
+        persistent_term:get(hecate_current_plugin), Name, 1)).
+-define(METRIC_ADD(Name, N),
+    hecate_plugin_metrics:counter(
+        persistent_term:get(hecate_current_plugin), Name, N)).
+-define(METRIC_SET(Name, V),
+    hecate_plugin_metrics:gauge(
+        persistent_term:get(hecate_current_plugin), Name, V)).
 
 -endif.
