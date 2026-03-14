@@ -90,6 +90,7 @@ Plus OTP builtins: `json`, `ets`, `pg`, `logger`, `crypto`, `calendar`, `mnesia`
 | `hecate_plugin_scheduler` | Cron-like recurring tasks |
 | `hecate_plugin_ratelimit` | Token bucket rate limiter |
 | `hecate_plugin_files` | Upload/download helpers |
+| `hecate_plugin_api` | JSON request/response utilities for Cowboy handlers |
 | `hecate_plugin_llm` | Capability-based LLM model selection |
 
 ## Frontend

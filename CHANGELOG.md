@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.4.1 — 2026-03-15
+
+### Added
+
+- `hecate_plugin_api` — JSON API utilities for plugin Cowboy handlers
+  - `json_response/3`, `json_ok/2,3`, `json_error/3` — consistent JSON responses
+  - `read_json_body/1` — decode JSON request bodies
+  - `get_field/2,3` — extract fields from maps with atom/binary key support
+  - `format_error/1` — convert error terms to binary
+  - `sanitize_for_json/1` — recursively convert `undefined` to `null`
+  - `method_not_allowed/1`, `not_found/1`, `bad_request/2` — standard HTTP errors
+  - Built-in metric counting: api_requests on every response, api_errors on error responses
+  - Plugins no longer need to copy-paste api_utils modules
+
 ## 0.4.0 — 2026-03-15
 
 ### Added
