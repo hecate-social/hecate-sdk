@@ -20,7 +20,7 @@
 %%% @end
 -module(hecate_plugin_codegen).
 
--export([plugin/1, division/1, desk/1, integration/1]).
+-export([plugin/1, division/1, desk/1, integration/1, delivery/1]).
 
 %% Shared helpers used by template sub-modules
 -export([fmt/2, s/1, b/1, write_files/1]).
@@ -76,6 +76,8 @@ division(#{subject := Subject, cmd_app := CmdApp, prj_app := PrjApp,
     OutDir = maps:get(output_dir, Opts, "apps"),
     StoreId = maps:get(store_id, Opts, b(s(PrjApp) ++ "_store")),
 
+    Flags = maps:get(flags, Opts, []),
+
     AggMod = s(Subject) ++ "_aggregate",
     StateMod = s(Subject) ++ "_state",
     StateHrl = s(Subject) ++ "_state.hrl",
@@ -96,7 +98,7 @@ division(#{subject := Subject, cmd_app := CmdApp, prj_app := PrjApp,
 
         %% CMD app: status header
         {filename:join([OutDir, s(CmdApp), "include", StatusHrl]),
-         hecate_plugin_codegen_plugin:tpl_status_hrl(s(Subject))},
+         hecate_plugin_codegen_plugin:tpl_status_hrl(s(Subject), Flags)},
 
         %% CMD app: app.src
         {filename:join([OutDir, s(CmdApp), "src", s(CmdApp) ++ ".app.src"]),
@@ -144,6 +146,14 @@ desk(#{dept := qry} = Opts) -> hecate_plugin_codegen_qry:desk(Opts).
 -spec integration(map()) -> {ok, [string()]}.
 integration(Opts) ->
     hecate_plugin_codegen_integration:generate(Opts).
+
+%% ===================================================================
+%% delivery/1 -- Dockerfile, CI/CD workflows, package scripts
+%% ===================================================================
+
+-spec delivery(map()) -> {ok, [string()]}.
+delivery(Opts) ->
+    hecate_plugin_codegen_delivery:generate(Opts).
 
 %% ===================================================================
 %% Shared Helpers

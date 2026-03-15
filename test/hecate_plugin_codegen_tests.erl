@@ -225,6 +225,119 @@ division_generates_files_test() ->
     cleanup_temp_dir(Dir).
 
 %% ===================================================================
+%% division/1 with custom FLAGS
+%% ===================================================================
+
+division_with_flags_test() ->
+    Dir = make_temp_dir("flags"),
+    AppsDir = filename:join(Dir, "apps"),
+    ok = filelib:ensure_dir(filename:join(AppsDir, "x")),
+    {ok, Files} = hecate_plugin_codegen:division(#{
+        subject => <<"invoice">>,
+        cmd_app => <<"guide_billing">>,
+        prj_app => <<"project_billings">>,
+        qry_app => <<"query_billings">>,
+        output_dir => AppsDir,
+        flags => [{<<"INITIATED">>, 1}, {<<"ARCHIVED">>, 2}, {<<"ISSUED">>, 4}]
+    }),
+    ?assert(length(Files) >= 10),
+    %% Check status.hrl contains custom ISSUED flag
+    StatusHrl = filename:join([AppsDir, "guide_billing", "include", "invoice_status.hrl"]),
+    ?assert(filelib:is_regular(StatusHrl)),
+    {ok, Content} = file:read_file(StatusHrl),
+    ?assertNotEqual(nomatch, binary:match(Content, <<"ISSUED">>)),
+    ?assertNotEqual(nomatch, binary:match(Content, <<"4">>)),
+    cleanup_temp_dir(Dir).
+
+%% ===================================================================
+%% delivery/1 -- generates delivery artifacts
+%% ===================================================================
+
+delivery_in_vm_generates_files_test() ->
+    Dir = make_temp_dir("deliver_vm"),
+    ok = filelib:ensure_dir(filename:join(Dir, "x")),
+    {ok, Files} = hecate_plugin_codegen:delivery(#{
+        plugin_name => <<"hecate-app-billing">>,
+        plugin_type => in_vm,
+        otp_version => <<"27">>,
+        output_dir => Dir
+    }),
+    ?assert(length(Files) >= 3),
+    %% Should have ci.yml, release.yml, package.sh
+    CiYml = filename:join([Dir, ".github", "workflows", "ci.yml"]),
+    ?assert(filelib:is_regular(CiYml)),
+    ReleaseYml = filename:join([Dir, ".github", "workflows", "release.yml"]),
+    ?assert(filelib:is_regular(ReleaseYml)),
+    PackageSh = filename:join([Dir, "scripts", "package.sh"]),
+    ?assert(filelib:is_regular(PackageSh)),
+    %% Should NOT have Dockerfile or docker.yml
+    ?assertNot(filelib:is_regular(filename:join(Dir, "Dockerfile"))),
+    ?assertNot(filelib:is_regular(filename:join([Dir, ".github", "workflows", "docker.yml"]))),
+    cleanup_temp_dir(Dir).
+
+delivery_container_generates_files_test() ->
+    Dir = make_temp_dir("deliver_ctr"),
+    ok = filelib:ensure_dir(filename:join(Dir, "x")),
+    {ok, Files} = hecate_plugin_codegen:delivery(#{
+        plugin_name => <<"hecate-app-trader">>,
+        plugin_type => container,
+        otp_version => <<"27">>,
+        port => <<"4444">>,
+        output_dir => Dir
+    }),
+    ?assert(length(Files) >= 3),
+    %% Should have ci.yml, Dockerfile, docker.yml
+    CiYml = filename:join([Dir, ".github", "workflows", "ci.yml"]),
+    ?assert(filelib:is_regular(CiYml)),
+    Dockerfile = filename:join(Dir, "Dockerfile"),
+    ?assert(filelib:is_regular(Dockerfile)),
+    DockerYml = filename:join([Dir, ".github", "workflows", "docker.yml"]),
+    ?assert(filelib:is_regular(DockerYml)),
+    %% Should NOT have release.yml or package.sh
+    ?assertNot(filelib:is_regular(filename:join([Dir, ".github", "workflows", "release.yml"]))),
+    ?assertNot(filelib:is_regular(filename:join([Dir, "scripts", "package.sh"]))),
+    %% Dockerfile should contain the port
+    {ok, DfContent} = file:read_file(Dockerfile),
+    ?assertNotEqual(nomatch, binary:match(DfContent, <<"4444">>)),
+    cleanup_temp_dir(Dir).
+
+%% ===================================================================
+%% bump_version/1 -- updates version strings
+%% ===================================================================
+
+bump_version_test() ->
+    Dir = make_temp_dir("bumpvsn"),
+    ok = filelib:ensure_dir(filename:join(Dir, "x")),
+    %% Create a manifest.json
+    ManifestPath = filename:join(Dir, "manifest.json"),
+    ok = file:write_file(ManifestPath, <<"{\"version\": \"0.1.0\", \"name\": \"test\"}">>),
+    %% Create a .app.src
+    SrcDir = filename:join(Dir, "src"),
+    ok = filelib:ensure_dir(filename:join(SrcDir, "x")),
+    AppSrcPath = filename:join(SrcDir, "test.app.src"),
+    ok = file:write_file(AppSrcPath, <<"{application, test, [{vsn, \"0.1.0\"}]}.">>),
+    %% Bump
+    ok = hecate_plugin_codegen_delivery:bump_version(#{
+        version => <<"0.2.0">>,
+        changelog => <<"Added new feature">>,
+        output_dir => Dir
+    }),
+    %% Verify manifest updated
+    {ok, ManifestContent} = file:read_file(ManifestPath),
+    ?assertNotEqual(nomatch, binary:match(ManifestContent, <<"0.2.0">>)),
+    ?assertEqual(nomatch, binary:match(ManifestContent, <<"0.1.0">>)),
+    %% Verify .app.src updated
+    {ok, AppSrcContent} = file:read_file(AppSrcPath),
+    ?assertNotEqual(nomatch, binary:match(AppSrcContent, <<"0.2.0">>)),
+    %% Verify CHANGELOG.md created
+    ChangelogPath = filename:join(Dir, "CHANGELOG.md"),
+    ?assert(filelib:is_regular(ChangelogPath)),
+    {ok, ChangelogContent} = file:read_file(ChangelogPath),
+    ?assertNotEqual(nomatch, binary:match(ChangelogContent, <<"0.2.0">>)),
+    ?assertNotEqual(nomatch, binary:match(ChangelogContent, <<"Added new feature">>)),
+    cleanup_temp_dir(Dir).
+
+%% ===================================================================
 %% Temp dir helpers
 %% ===================================================================
 

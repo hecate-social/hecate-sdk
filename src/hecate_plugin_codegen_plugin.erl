@@ -7,7 +7,7 @@
 
 -export([tpl_plugin_callback/5, tpl_plugin_sup/1]).
 -export([tpl_app_src/2, tpl_rebar_config/1, tpl_manifest/5]).
--export([tpl_aggregate/3, tpl_state/2, tpl_state_hrl/2, tpl_status_hrl/1]).
+-export([tpl_aggregate/3, tpl_state/2, tpl_state_hrl/2, tpl_status_hrl/1, tpl_status_hrl/2]).
 -export([tpl_dept_sup/1]).
 
 -import(hecate_plugin_codegen, [fmt/2, s/1, sdk_version/0, store_name/1]).
@@ -202,24 +202,37 @@ tpl_state_hrl(_StateMod, Subject) ->
         [Guard, Guard, RecName]).
 
 tpl_status_hrl(Subject) ->
+    tpl_status_hrl(Subject, []).
+
+tpl_status_hrl(Subject, []) ->
+    tpl_status_hrl(Subject, [{<<"INITIATED">>, 1}, {<<"ARCHIVED">>, 2}]);
+tpl_status_hrl(Subject, Flags) ->
     Prefix = string:uppercase(string:slice(Subject, 0, 2)),
     Guard = string:uppercase(Subject ++ "_status_hrl"),
+    Defines = lists:map(fun({Name, Val}) ->
+        FlagName = s(Name),
+        fmt("-define(~s_~s, ~b).  %% 2^~b\n",
+            [Prefix, FlagName, Val, trunc(math:log2(Val))])
+    end, Flags),
+    MapEntries = lists:map(fun({Name, _Val}) ->
+        FlagName = s(Name),
+        LowerName = string:lowercase(FlagName),
+        fmt("    ?~s_~s => <<\"~s\">>", [Prefix, FlagName, LowerName])
+    end, Flags),
+    MapBody = string:join(MapEntries, ",\n"),
     fmt("-ifndef(~s).\n"
         "-define(~s, true).\n"
         "\n"
         "%% Bit flag definitions for ~s status\n"
-        "-define(~s_INITIATED, 1).  %% 2^0\n"
-        "-define(~s_ARCHIVED,  2).  %% 2^1\n"
-        "%% TODO: Add status flags (powers of 2)\n"
+        "~s"
         "\n"
         "-define(~s_FLAG_MAP, #{\n"
-        "    ?~s_INITIATED => <<\"initiated\">>,\n"
-        "    ?~s_ARCHIVED  => <<\"archived\">>\n"
+        "~s\n"
         "}).\n"
         "\n"
         "-endif.\n",
         [Guard, Guard, Subject,
-         Prefix, Prefix, Prefix, Prefix, Prefix]).
+         lists:flatten(Defines), Prefix, MapBody]).
 
 %% ===================================================================
 %% Shared Templates (app.src, dept_sup, rebar.config, manifest)
