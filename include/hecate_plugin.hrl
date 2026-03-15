@@ -19,7 +19,7 @@
 }).
 
 %% SDK version — plugins can check at compile time.
--define(HECATE_SDK_VERSION, "0.6.0").
+-define(HECATE_SDK_VERSION, "0.6.1").
 
 %% -------------------------------------------------------------------
 %% Metrics macros

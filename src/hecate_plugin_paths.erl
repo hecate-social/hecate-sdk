@@ -9,7 +9,10 @@
 %%%   ├── reckon-db/     — ReckonDB event store
 %%%   └── run/           — Runtime files (PID, etc.)
 %%%
-%%% When HECATE_HOME is set (e.g., ~/.hecate-dev), paths adjust automatically.
+%%% Resolution order for the base directory:
+%%%   1. application:get_env(hecate, data_dir) — set when running inside hecate-daemon
+%%%   2. HECATE_HOME env var — set when running as a standalone plugin
+%%%   3. ~/.hecate — default fallback
 %%% @end
 %%%-------------------------------------------------------------------
 -module(hecate_plugin_paths).
@@ -20,7 +23,7 @@
 %% @doc Root data directory for a plugin.
 -spec base_dir(PluginName :: string() | binary()) -> file:filename().
 base_dir(PluginName) ->
-    Name = to_list(PluginName),
+    Name = sanitize_name(PluginName),
     HecateHome = hecate_home(),
     filename:join([HecateHome, "plugins", Name]).
 
@@ -65,10 +68,25 @@ ensure_layout(PluginName) ->
 %%--------------------------------------------------------------------
 
 hecate_home() ->
+    case application:get_env(hecate, data_dir) of
+        {ok, Dir} -> expand_tilde(Dir);
+        undefined -> hecate_home_from_env()
+    end.
+
+hecate_home_from_env() ->
     case os:getenv("HECATE_HOME") of
         false -> filename:join(os:getenv("HOME"), ".hecate");
         Dir   -> Dir
     end.
 
-to_list(V) when is_binary(V) -> binary_to_list(V);
-to_list(V) when is_list(V) -> V.
+expand_tilde([$~ | Rest]) -> os:getenv("HOME") ++ Rest;
+expand_tilde(Path)        -> Path.
+
+%% Strip org prefix (e.g., "hecate-apps/scribe" -> "scribe")
+sanitize_name(Name) when is_binary(Name) ->
+    case binary:split(Name, <<"/">>) of
+        [_, Short] -> binary_to_list(Short);
+        [Single]   -> binary_to_list(Single)
+    end;
+sanitize_name(Name) when is_list(Name) ->
+    Name.
