@@ -4,7 +4,7 @@ The contract between the Hecate daemon and plugins.
 
 Plugins are OTP applications that load into the daemon VM. The SDK provides:
 
-- **Platform dependencies** — pinned versions, one `{hecate_sdk, "~> 0.4"}` dep
+- **Platform dependencies** — pinned versions, one `{hecate_sdk, "~> 0.5"}` dep
 - **Plugin behaviour** — `hecate_plugin` callbacks the daemon calls
 - **Observability** — structured JSON logging, metrics, health reporting (auto-wired)
 - **Helpers** — paths, store setup, cowboy routes, WebSocket, validation, scheduling, rate limiting, file I/O
@@ -14,7 +14,7 @@ Plugins are OTP applications that load into the daemon VM. The SDK provides:
 ```erlang
 %% rebar.config
 {deps, [
-    {hecate_sdk, "~> 0.4"}
+    {hecate_sdk, "~> 0.5"}
 ]}.
 ```
 
@@ -93,6 +93,7 @@ Plus OTP builtins: `json`, `ets`, `pg`, `logger`, `crypto`, `calendar`, `mnesia`
 | `hecate_plugin_api` | JSON request/response utilities for Cowboy handlers |
 | `hecate_plugin_routes` | Route discovery from OTP app metadata |
 | `hecate_plugin_llm` | Capability-based LLM model selection |
+| `hecate_plugin_codegen` | Code generation for plugin scaffolding (plugin, division, desk, integration) |
 
 ## Frontend
 

@@ -1,5 +1,23 @@
 # Changelog
 
+## 0.5.0 — 2026-03-15
+
+### Added
+
+- `hecate_plugin_codegen` — code generation for plugin scaffolding
+  - `plugin/1` — full plugin skeleton (callback, supervisor, app.src, rebar.config, manifest.json)
+  - `division/1` — aggregate + state + state/status headers + CMD/PRJ/QRY department apps
+  - `desk/1` — CMD desk (command, event, handler, API, tests), PRJ desk (projection, tests), QRY desk (page/by_id endpoint, tests)
+  - `integration/1` — emitter, listener, process manager, requester, responder (each with supervisor)
+  - All functions idempotent (skip existing files), return `{ok, [FilePath]}`
+  - Templates split across 5 focused sub-modules for maintainability:
+    - `hecate_plugin_codegen_plugin` — plugin + division templates
+    - `hecate_plugin_codegen_cmd` — CMD desk templates
+    - `hecate_plugin_codegen_prj` — PRJ desk templates
+    - `hecate_plugin_codegen_qry` — QRY desk templates
+    - `hecate_plugin_codegen_integration` — integration templates
+  - Designed for Martha's coder agent roles to call programmatically from BEAM
+
 ## 0.4.2 — 2026-03-15
 
 ### Added
