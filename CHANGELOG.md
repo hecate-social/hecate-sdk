@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.4.2 — 2026-03-15
+
+### Added
+
+- `hecate_plugin_routes` — route discovery from OTP app metadata
+  - `discover_routes/1` — scans app modules for `routes/0` exports, collects route tuples
+  - `strip_api_prefix/1` — removes "/api" prefix to avoid double-nesting under plugin mount
+  - Plugins no longer need to copy-paste route discovery logic
+- `hecate_plugin_store:start_extra_stores/2` — create additional ReckonDB stores
+  - Takes base data dir + list of `{StoreId, SubDir, Label}` specs
+  - Handles directory creation, store startup, already_started, and error logging
+- `hecate_plugin_store:start_subscriptions/1` — start evoq event delivery for stores
+  - Wires up `evoq_store_subscription` for each store ID
+
 ## 0.4.1 — 2026-03-15
 
 ### Added
