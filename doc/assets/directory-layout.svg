@@ -1,0 +1,96 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 420" font-family="ui-monospace, 'Cascadia Code', 'Fira Code', monospace" font-size="13">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#f8fafc"/>
+      <stop offset="100%" stop-color="#f1f5f9"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="600" height="420" rx="8" fill="url(#bg)" stroke="#e2e8f0" stroke-width="1"/>
+
+  <!-- Title -->
+  <text x="300" y="28" text-anchor="middle" font-family="system-ui, sans-serif" font-size="16" font-weight="bold" fill="#1e293b">Plugin Directory Layout</text>
+
+  <!-- Tree -->
+  <g fill="#334155" font-size="13">
+    <!-- Root -->
+    <text x="30" y="65">
+      <tspan fill="#f59e0b">~/.hecate/</tspan>
+    </text>
+
+    <!-- plugins dir -->
+    <text x="30" y="90">
+      <tspan fill="#64748b">  </tspan><tspan fill="#94a3b8">|</tspan>
+    </text>
+    <text x="30" y="110">
+      <tspan fill="#64748b">  </tspan><tspan fill="#94a3b8">+--</tspan><tspan fill="#3b82f6"> plugins/</tspan>
+    </text>
+
+    <!-- plugin name -->
+    <text x="30" y="135">
+      <tspan fill="#64748b">       </tspan><tspan fill="#94a3b8">|</tspan>
+    </text>
+    <text x="30" y="155">
+      <tspan fill="#64748b">       </tspan><tspan fill="#94a3b8">+--</tspan><tspan fill="#8b5cf6"> scribe/</tspan><tspan fill="#94a3b8" font-size="11">                 (plugin root)</tspan>
+    </text>
+
+    <!-- ebin -->
+    <text x="30" y="180">
+      <tspan fill="#64748b">            </tspan><tspan fill="#94a3b8">|</tspan>
+    </text>
+    <text x="30" y="200">
+      <tspan fill="#64748b">            </tspan><tspan fill="#94a3b8">+--</tspan><tspan fill="#22c55e"> ebin/</tspan><tspan fill="#94a3b8" font-size="11">             (compiled .beam files)</tspan>
+    </text>
+
+    <!-- priv/static -->
+    <text x="30" y="220">
+      <tspan fill="#64748b">            </tspan><tspan fill="#94a3b8">|</tspan>
+    </text>
+    <text x="30" y="240">
+      <tspan fill="#64748b">            </tspan><tspan fill="#94a3b8">+--</tspan><tspan fill="#22c55e"> priv/static/</tspan><tspan fill="#94a3b8" font-size="11">      (frontend assets)</tspan>
+    </text>
+
+    <!-- manifest -->
+    <text x="30" y="260">
+      <tspan fill="#64748b">            </tspan><tspan fill="#94a3b8">|</tspan>
+    </text>
+    <text x="30" y="280">
+      <tspan fill="#64748b">            </tspan><tspan fill="#94a3b8">+--</tspan><tspan fill="#64748b"> manifest.json</tspan><tspan fill="#94a3b8" font-size="11">    (plugin metadata)</tspan>
+    </text>
+
+    <!-- sqlite -->
+    <text x="30" y="300">
+      <tspan fill="#64748b">            </tspan><tspan fill="#94a3b8">|</tspan>
+    </text>
+    <text x="30" y="320">
+      <tspan fill="#64748b">            </tspan><tspan fill="#94a3b8">+--</tspan><tspan fill="#ef4444"> sqlite/</tspan><tspan fill="#94a3b8" font-size="11">           (SQLite read models)</tspan>
+    </text>
+
+    <!-- reckon-db -->
+    <text x="30" y="340">
+      <tspan fill="#64748b">            </tspan><tspan fill="#94a3b8">|</tspan>
+    </text>
+    <text x="30" y="360">
+      <tspan fill="#64748b">            </tspan><tspan fill="#94a3b8">+--</tspan><tspan fill="#ef4444"> reckon-db/</tspan><tspan fill="#94a3b8" font-size="11">        (ReckonDB event store)</tspan>
+    </text>
+
+    <!-- run -->
+    <text x="30" y="380">
+      <tspan fill="#64748b">            </tspan><tspan fill="#94a3b8">|</tspan>
+    </text>
+    <text x="30" y="400">
+      <tspan fill="#64748b">            </tspan><tspan fill="#94a3b8">+--</tspan><tspan fill="#64748b"> run/</tspan><tspan fill="#94a3b8" font-size="11">              (PID files, temp data)</tspan>
+    </text>
+  </g>
+
+  <!-- Color legend box -->
+  <rect x="400" y="55" width="180" height="100" rx="6" fill="white" stroke="#e2e8f0" stroke-width="1"/>
+  <text x="410" y="75" font-family="system-ui, sans-serif" font-size="11" font-weight="600" fill="#475569">Legend</text>
+  <circle cx="420" cy="92" r="4" fill="#22c55e"/>
+  <text x="430" y="96" font-family="system-ui, sans-serif" font-size="11" fill="#475569">From .tar.gz package</text>
+  <circle cx="420" cy="112" r="4" fill="#ef4444"/>
+  <text x="430" y="116" font-family="system-ui, sans-serif" font-size="11" fill="#475569">Created by daemon</text>
+  <circle cx="420" cy="132" r="4" fill="#64748b"/>
+  <text x="430" y="136" font-family="system-ui, sans-serif" font-size="11" fill="#475569">From package or daemon</text>
+</svg>
