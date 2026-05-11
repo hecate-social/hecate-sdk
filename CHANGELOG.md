@@ -1,5 +1,25 @@
 # Changelog
 
+## 0.6.2 — 2026-05-11
+
+### Changed
+
+- Widened the `macula` dep from `~> 4.0.0` (which only allowed 4.0.x) to
+  `~> 4.3` (≥ 4.3.0, < 5.0.0). macula 4.3.0 adds the `station` MRI type +
+  the `macula_z32` z-base-32 codec. This lets consumers (notably
+  `hecate-daemon`) drop the `{overrides, [{override, hecate_sdk, …}]}`
+  block they were using to force the transitive macula pin up to 4.3.x.
+- Bumped the event-sourcing stack into lockstep with `hecate-daemon` —
+  `reckon_db` `1.6.0` → `2.0.0`, `reckon_gater` `1.3.0` → `2.0.1`,
+  `evoq` `1.9.1` → `1.14.4`, `reckon_evoq` `1.5.0` → `2.0.0`. The pins
+  were stale by a full major line (`reckon_db`/`reckon_gater`/`reckon_evoq`
+  2.x carries the `reckon_gater_types` / `reckon_gater_api` renames); the
+  daemon was already resolving these to the 2.x line via conflict
+  resolution, so this just makes the SDK's declared deps match reality.
+  Compiles clean against the new set.
+- `app.src` source link → Codeberg (`hecate-social/hecate-sdk`), the
+  canonical home since the 2026-04-30 migration.
+
 ## 0.5.0 — 2026-03-15
 
 ### Added
