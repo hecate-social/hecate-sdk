@@ -5,14 +5,14 @@
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="ExDoc v0.39.1">
-    <meta name="project" content="hecate_sdk v0.6.1">
+    <meta name="project" content="hecate_sdk v0.6.2">
 
 
-    <title>hecate_plugin_llm — hecate_sdk v0.6.1</title>
+    <title>hecate_plugin_llm — hecate_sdk v0.6.2</title>
 
     <link rel="stylesheet" href="dist/html-erlang-7YNYEB7F.css" />
 
-    <script defer src="dist/sidebar_items-AF4EEDA0.js"></script>
+    <script defer src="dist/sidebar_items-80ADBC63.js"></script>
     <script defer src="docs_config.js"></script>
     <script defer src="dist/html-HBZYRXZS.js"></script>
 
@@ -37,7 +37,7 @@
 hecate_sdk
         </a>
         <div class="sidebar-projectVersion" translate="no">
-          v0.6.1
+          v0.6.2
         </div>
       </div>
     </div>
@@ -94,11 +94,11 @@ hecate_sdk
   <div class="heading-with-actions top-heading">
     <h1>
       <span translate="no">hecate_plugin_llm</span> 
-      <small class="app-vsn" translate="no">(hecate_sdk v0.6.1)</small>
+      <small class="app-vsn" translate="no">(hecate_sdk v0.6.2)</small>
 
     </h1>
 
-      <a href="https://github.com/hecate-social/hecate-sdk/blob/v0.6.1/src/hecate_plugin_llm.erl#L31" title="View Source" class="icon-action" rel="help">
+      <a href="https://codeberg.org/hecate-social/hecate-sdk" title="View Source" class="icon-action" rel="help">
         <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         <span class="sr-only">View Source</span>
       </a>
@@ -107,10 +107,10 @@ hecate_sdk
 
 
     <section id="moduledoc">
-<p>LLM access for plugins via the daemon's serve_llm domain.</p><p>Provides capability-based model selection so plugins never hardcode model names. Delegates all LLM operations to the daemon's chat_to_llm and manage_providers modules.</p><h3 id="module-capabilities" class="section-heading"><a href="#module-capabilities" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text"><a name="Capabilities">Capabilities</a></span></h3><p>Models are classified into three tiers:</p><p>- <code>fast</code> — Smallest, fastest models. Good for classification, extraction, simple Q&amp;A. (e.g. Haiku, GPT-4o-mini, small local)</p><p>- <code>balanced</code> — Mid-tier models. Good for most tasks: summarization, code generation, analysis. (e.g. Sonnet, GPT-4o, medium local)</p><p>- <code>smart</code> — Largest, most capable models. Good for complex reasoning, planning, architecture. (e.g. Opus, o1/o3, large local)</p><h3 id="module-usage" class="section-heading"><a href="#module-usage" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text"><a name="Usage">Usage</a></span></h3><pre><code class="makeup erlang" translate="no"><span class="w">   </span><span class="p" data-group-id="4999271323-1">{</span><span class="ss">ok</span><span class="p">,</span><span class="w"> </span><span class="n">Model</span><span class="p" data-group-id="4999271323-1">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">hecate_plugin_llm</span><span class="p">:</span><span class="nf">select_model</span><span class="p" data-group-id="4999271323-2">(</span><span class="p" data-group-id="4999271323-3">#{</span><span class="ss">capability</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="ss">balanced</span><span class="p" data-group-id="4999271323-3">}</span><span class="p" data-group-id="4999271323-2">)</span><span class="p">,</span><span class="w">
-   </span><span class="p" data-group-id="4999271323-4">{</span><span class="ss">ok</span><span class="p">,</span><span class="w"> </span><span class="n">Reply</span><span class="p" data-group-id="4999271323-4">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">hecate_plugin_llm</span><span class="p">:</span><span class="nf">chat</span><span class="p" data-group-id="4999271323-5">(</span><span class="n">Model</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="4999271323-6">[</span><span class="w">
-       </span><span class="p" data-group-id="4999271323-7">#{</span><span class="ss">role</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p" data-group-id="4999271323-8">&lt;&lt;</span><span class="s">&quot;user&quot;</span><span class="p" data-group-id="4999271323-8">&gt;&gt;</span><span class="p">,</span><span class="w"> </span><span class="ss">content</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p" data-group-id="4999271323-9">&lt;&lt;</span><span class="s">&quot;Summarize this document&quot;</span><span class="p" data-group-id="4999271323-9">&gt;&gt;</span><span class="p" data-group-id="4999271323-7">}</span><span class="w">
-   </span><span class="p" data-group-id="4999271323-6">]</span><span class="p" data-group-id="4999271323-5">)</span><span class="p">.</span></code></pre>
+<p>LLM access for plugins via the daemon's serve_llm domain.</p><p>Provides capability-based model selection so plugins never hardcode model names. Delegates all LLM operations to the daemon's chat_to_llm and manage_providers modules.</p><h3 id="module-capabilities" class="section-heading"><a href="#module-capabilities" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text"><a name="Capabilities">Capabilities</a></span></h3><p>Models are classified into three tiers:</p><p>- <code>fast</code> — Smallest, fastest models. Good for classification, extraction, simple Q&amp;A. (e.g. Haiku, GPT-4o-mini, small local)</p><p>- <code>balanced</code> — Mid-tier models. Good for most tasks: summarization, code generation, analysis. (e.g. Sonnet, GPT-4o, medium local)</p><p>- <code>smart</code> — Largest, most capable models. Good for complex reasoning, planning, architecture. (e.g. Opus, o1/o3, large local)</p><h3 id="module-usage" class="section-heading"><a href="#module-usage" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text"><a name="Usage">Usage</a></span></h3><pre><code class="makeup erlang" translate="no"><span class="w">   </span><span class="p" data-group-id="4853390841-1">{</span><span class="ss">ok</span><span class="p">,</span><span class="w"> </span><span class="n">Model</span><span class="p" data-group-id="4853390841-1">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">hecate_plugin_llm</span><span class="p">:</span><span class="nf">select_model</span><span class="p" data-group-id="4853390841-2">(</span><span class="p" data-group-id="4853390841-3">#{</span><span class="ss">capability</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="ss">balanced</span><span class="p" data-group-id="4853390841-3">}</span><span class="p" data-group-id="4853390841-2">)</span><span class="p">,</span><span class="w">
+   </span><span class="p" data-group-id="4853390841-4">{</span><span class="ss">ok</span><span class="p">,</span><span class="w"> </span><span class="n">Reply</span><span class="p" data-group-id="4853390841-4">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">hecate_plugin_llm</span><span class="p">:</span><span class="nf">chat</span><span class="p" data-group-id="4853390841-5">(</span><span class="n">Model</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="4853390841-6">[</span><span class="w">
+       </span><span class="p" data-group-id="4853390841-7">#{</span><span class="ss">role</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p" data-group-id="4853390841-8">&lt;&lt;</span><span class="s">&quot;user&quot;</span><span class="p" data-group-id="4853390841-8">&gt;&gt;</span><span class="p">,</span><span class="w"> </span><span class="ss">content</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p" data-group-id="4853390841-9">&lt;&lt;</span><span class="s">&quot;Summarize this document&quot;</span><span class="p" data-group-id="4853390841-9">&gt;&gt;</span><span class="p" data-group-id="4853390841-7">}</span><span class="w">
+   </span><span class="p" data-group-id="4853390841-6">]</span><span class="p" data-group-id="4853390841-5">)</span><span class="p">.</span></code></pre>
     </section>
 
 </div>
@@ -215,7 +215,7 @@ hecate_sdk
       <h1 class="signature" translate="no">capability/0</h1>
 
 
-        <a href="https://github.com/hecate-social/hecate-sdk/blob/v0.6.1/src/hecate_plugin_llm.erl#L36" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://codeberg.org/hecate-social/hecate-sdk" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -256,7 +256,7 @@ hecate_sdk
       <h1 class="signature" translate="no">chat(Model, Messages)</h1>
 
 
-        <a href="https://github.com/hecate-social/hecate-sdk/blob/v0.6.1/src/hecate_plugin_llm.erl#L75" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://codeberg.org/hecate-social/hecate-sdk" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -284,7 +284,7 @@ hecate_sdk
       <h1 class="signature" translate="no">chat(Model, Messages, Opts)</h1>
 
 
-        <a href="https://github.com/hecate-social/hecate-sdk/blob/v0.6.1/src/hecate_plugin_llm.erl#L86" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://codeberg.org/hecate-social/hecate-sdk" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -312,7 +312,7 @@ hecate_sdk
       <h1 class="signature" translate="no">chat_stream(Model, Messages, Opts)</h1>
 
 
-        <a href="https://github.com/hecate-social/hecate-sdk/blob/v0.6.1/src/hecate_plugin_llm.erl#L100" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://codeberg.org/hecate-social/hecate-sdk" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -340,7 +340,7 @@ hecate_sdk
       <h1 class="signature" translate="no">list_models()</h1>
 
 
-        <a href="https://github.com/hecate-social/hecate-sdk/blob/v0.6.1/src/hecate_plugin_llm.erl#L67" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://codeberg.org/hecate-social/hecate-sdk" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -368,7 +368,7 @@ hecate_sdk
       <h1 class="signature" translate="no">select_model(Opts)</h1>
 
 
-        <a href="https://github.com/hecate-social/hecate-sdk/blob/v0.6.1/src/hecate_plugin_llm.erl#L53" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://codeberg.org/hecate-social/hecate-sdk" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -394,9 +394,9 @@ hecate_sdk
       <p>
 
           <span class="line">
-            <a href="https://hex.pm/packages/hecate_sdk/0.6.1" class="footer-hex-package">Hex Package</a>
+            <a href="https://hex.pm/packages/hecate_sdk/0.6.2" class="footer-hex-package">Hex Package</a>
 
-            <a href="https://preview.hex.pm/preview/hecate_sdk/0.6.1">Hex Preview</a>
+            <a href="https://preview.hex.pm/preview/hecate_sdk/0.6.2">Hex Preview</a>
 
           </span>
 

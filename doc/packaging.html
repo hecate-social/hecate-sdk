@@ -5,14 +5,14 @@
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="ExDoc v0.39.1">
-    <meta name="project" content="hecate_sdk v0.6.1">
+    <meta name="project" content="hecate_sdk v0.6.2">
 
 
-    <title>Packaging Guide — hecate_sdk v0.6.1</title>
+    <title>Packaging Guide — hecate_sdk v0.6.2</title>
 
     <link rel="stylesheet" href="dist/html-erlang-7YNYEB7F.css" />
 
-    <script defer src="dist/sidebar_items-AF4EEDA0.js"></script>
+    <script defer src="dist/sidebar_items-80ADBC63.js"></script>
     <script defer src="docs_config.js"></script>
     <script defer src="dist/html-HBZYRXZS.js"></script>
 
@@ -37,7 +37,7 @@
 hecate_sdk
         </a>
         <div class="sidebar-projectVersion" translate="no">
-          v0.6.1
+          v0.6.2
         </div>
       </div>
     </div>
@@ -95,7 +95,7 @@ hecate_sdk
     <h1>Packaging Guide</h1>
 
 
-      <a href="https://github.com/hecate-social/hecate-sdk/blob/v0.6.1/guides/packaging.md#L1" title="View Source" class="icon-action" rel="help">
+      <a href="https://codeberg.org/hecate-social/hecate-sdk" title="View Source" class="icon-action" rel="help">
         <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         <span class="sr-only">View Source</span>
       </a>
@@ -105,7 +105,7 @@ hecate_sdk
 
 <p>This guide covers how to build, package, and distribute your Hecate plugin.</p><h2 id="package-format" class="section-heading"><a href="#package-format" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Package Format</span></h2><p>A plugin package is a <code class="inline">.tar.gz</code> archive containing:</p><pre><code class="makeup erlang" translate="no"><span class="ss">scribe</span><span class="p">.</span><span class="ss">tar</span><span class="p">.</span><span class="ss">gz</span><span class="w">
   </span><span class="ss">ebin</span><span class="o">/</span><span class="w">               </span><span class="n">All</span><span class="w"> </span><span class="ss">compiled</span><span class="w"> </span><span class="p">.</span><span class="ss">beam</span><span class="w"> </span><span class="ss">files</span><span class="w">
-  </span><span class="ss">priv</span><span class="o">/</span><span class="ss">static</span><span class="o">/</span><span class="w">        </span><span class="n">Frontend</span><span class="w"> </span><span class="nf">assets</span><span class="w"> </span><span class="p" data-group-id="4609106082-1">(</span><span class="ss">optional</span><span class="p" data-group-id="4609106082-1">)</span><span class="w">
+  </span><span class="ss">priv</span><span class="o">/</span><span class="ss">static</span><span class="o">/</span><span class="w">        </span><span class="n">Frontend</span><span class="w"> </span><span class="nf">assets</span><span class="w"> </span><span class="p" data-group-id="6993820916-1">(</span><span class="ss">optional</span><span class="p" data-group-id="6993820916-1">)</span><span class="w">
   </span><span class="ss">manifest</span><span class="p">.</span><span class="ss">json</span><span class="w">       </span><span class="n">Plugin</span><span class="w"> </span><span class="ss">metadata</span></code></pre><p>The daemon extracts this to <code class="inline">~/.hecate/plugins/{name}/</code> and loads the code into the VM.</p><h2 id="manifest-json" class="section-heading"><a href="#manifest-json" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">manifest.json</span></h2><p>Every package must include a <code class="inline">manifest.json</code>:</p><pre><code class="json">{
   &quot;name&quot;: &quot;my-plugin&quot;,
   &quot;version&quot;: &quot;0.1.0&quot;,
@@ -169,9 +169,9 @@ hecate_sdk
 </span><span class="">    &quot;callback_module&quot;: &quot;my_plugin&quot;
 </span><span class="">  }&#39;
 </span></code></pre><h3 id="via-the-appstore" class="section-heading"><a href="#via-the-appstore" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Via the AppStore</span></h3><p>When published to the Hecate AppStore, users install with one click. The daemon:</p><ol><li>Downloads the <code class="inline">.tar.gz</code> to <code class="inline">~/.hecate/plugins/{name}/</code></li><li>Dispatches the install command</li><li>Process managers handle extract, activate, load automatically</li></ol><h2 id="version-upgrades" class="section-heading"><a href="#version-upgrades" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Version Upgrades</span></h2><p>To upgrade a plugin:</p><ol><li>Build the new package</li><li>Replace the tarball at <code class="inline">~/.hecate/plugins/{name}/{name}.tar.gz</code></li><li>The daemon can reload via <code class="inline">hecate_plugin_loader:reload_plugin/2</code></li></ol><p>Reload is atomic: unload old code, load new code. Running requests complete before unload.</p><h2 id="dependency-management" class="section-heading"><a href="#dependency-management" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Dependency Management</span></h2><p>Your plugin should depend only on <code class="inline">hecate_sdk</code>. All platform libraries come transitively:</p><pre><code class="makeup erlang" translate="no"><span class="c1">%% rebar.config</span><span class="w">
-</span><span class="p" data-group-id="2352757553-1">{</span><span class="ss">deps</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="2352757553-2">[</span><span class="w">
-    </span><span class="p" data-group-id="2352757553-3">{</span><span class="ss">hecate_sdk</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;0.1.0&quot;</span><span class="p" data-group-id="2352757553-3">}</span><span class="w">
-</span><span class="p" data-group-id="2352757553-2">]</span><span class="p" data-group-id="2352757553-1">}</span><span class="p">.</span></code></pre><p>Do <strong>not</strong> add <code class="inline">cowboy</code>, <code class="inline">evoq</code>, <code class="inline">reckon_db</code>, etc. as direct dependencies. Version conflicts will break loading.</p><p>If you need a library not in the SDK, add it as a dependency and include its <code class="inline">.beam</code> files in your package's <code class="inline">ebin/</code>.</p><h2 id="troubleshooting" class="section-heading"><a href="#troubleshooting" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Troubleshooting</span></h2><h3 id="ebin_not_found-error" class="section-heading"><a href="#ebin_not_found-error" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">&quot;ebin_not_found&quot; error</span></h3><p>The daemon looks for <code class="inline">ebin/</code> at <code class="inline">~/.hecate/plugins/{name}/ebin/</code>. Check:</p><ul><li>Did the tarball extract correctly?</li><li>Is the tarball structure flat (files at root, not nested in a subdirectory)?</li></ul><h3 id="callback_not_loadable-error" class="section-heading"><a href="#callback_not_loadable-error" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">&quot;callback_not_loadable&quot; error</span></h3><p>The callback module's <code class="inline">.beam</code> file is not in <code class="inline">ebin/</code>. Check:</p><ul><li>Is the module name in <code class="inline">manifest.json</code> correct?</li><li>Did <code class="inline">rebar3 compile</code> succeed before packaging?</li><li>Is the <code class="inline">.beam</code> file included in the tarball?</li></ul><h3 id="routes-not-appearing" class="section-heading"><a href="#routes-not-appearing" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Routes not appearing</span></h3><p>Check that your <code class="inline">routes/0</code> returns valid cowboy routes. The daemon logs route count during hot-swap:</p><pre><code class="makeup erlang" translate="no"><span class="p" data-group-id="0383280186-1">[</span><span class="ss">plugin</span><span class="o">-</span><span class="ss">loader</span><span class="p" data-group-id="0383280186-1">]</span><span class="w"> </span><span class="n">Routes</span><span class="w"> </span><span class="ss">hot</span><span class="o">-</span><span class="nf">swapped</span><span class="w"> </span><span class="p" data-group-id="0383280186-2">(</span><span class="mi">3</span><span class="w"> </span><span class="ss">plugin</span><span class="w"> </span><span class="n">API</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="ss">plugin</span><span class="w"> </span><span class="ss">static</span><span class="p" data-group-id="0383280186-2">)</span></code></pre><h3 id="store-not-created" class="section-heading"><a href="#store-not-created" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Store not created</span></h3><p>If <code class="inline">store_config/0</code> returns a config but the store fails:</p><ul><li>Check that ReckonDB infrastructure is running (the daemon starts it at boot)</li><li>Check logs for <code class="inline">[plugin-store] Creating ...</code> messages</li><li>Verify your <code class="inline">store_id</code> atom is unique across all plugins</li></ul>
+</span><span class="p" data-group-id="3934194253-1">{</span><span class="ss">deps</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="3934194253-2">[</span><span class="w">
+    </span><span class="p" data-group-id="3934194253-3">{</span><span class="ss">hecate_sdk</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;0.1.0&quot;</span><span class="p" data-group-id="3934194253-3">}</span><span class="w">
+</span><span class="p" data-group-id="3934194253-2">]</span><span class="p" data-group-id="3934194253-1">}</span><span class="p">.</span></code></pre><p>Do <strong>not</strong> add <code class="inline">cowboy</code>, <code class="inline">evoq</code>, <code class="inline">reckon_db</code>, etc. as direct dependencies. Version conflicts will break loading.</p><p>If you need a library not in the SDK, add it as a dependency and include its <code class="inline">.beam</code> files in your package's <code class="inline">ebin/</code>.</p><h2 id="troubleshooting" class="section-heading"><a href="#troubleshooting" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Troubleshooting</span></h2><h3 id="ebin_not_found-error" class="section-heading"><a href="#ebin_not_found-error" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">&quot;ebin_not_found&quot; error</span></h3><p>The daemon looks for <code class="inline">ebin/</code> at <code class="inline">~/.hecate/plugins/{name}/ebin/</code>. Check:</p><ul><li>Did the tarball extract correctly?</li><li>Is the tarball structure flat (files at root, not nested in a subdirectory)?</li></ul><h3 id="callback_not_loadable-error" class="section-heading"><a href="#callback_not_loadable-error" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">&quot;callback_not_loadable&quot; error</span></h3><p>The callback module's <code class="inline">.beam</code> file is not in <code class="inline">ebin/</code>. Check:</p><ul><li>Is the module name in <code class="inline">manifest.json</code> correct?</li><li>Did <code class="inline">rebar3 compile</code> succeed before packaging?</li><li>Is the <code class="inline">.beam</code> file included in the tarball?</li></ul><h3 id="routes-not-appearing" class="section-heading"><a href="#routes-not-appearing" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Routes not appearing</span></h3><p>Check that your <code class="inline">routes/0</code> returns valid cowboy routes. The daemon logs route count during hot-swap:</p><pre><code class="makeup erlang" translate="no"><span class="p" data-group-id="9250897149-1">[</span><span class="ss">plugin</span><span class="o">-</span><span class="ss">loader</span><span class="p" data-group-id="9250897149-1">]</span><span class="w"> </span><span class="n">Routes</span><span class="w"> </span><span class="ss">hot</span><span class="o">-</span><span class="nf">swapped</span><span class="w"> </span><span class="p" data-group-id="9250897149-2">(</span><span class="mi">3</span><span class="w"> </span><span class="ss">plugin</span><span class="w"> </span><span class="n">API</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="ss">plugin</span><span class="w"> </span><span class="ss">static</span><span class="p" data-group-id="9250897149-2">)</span></code></pre><h3 id="store-not-created" class="section-heading"><a href="#store-not-created" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Store not created</span></h3><p>If <code class="inline">store_config/0</code> returns a config but the store fails:</p><ul><li>Check that ReckonDB infrastructure is running (the daemon starts it at boot)</li><li>Check logs for <code class="inline">[plugin-store] Creating ...</code> messages</li><li>Verify your <code class="inline">store_id</code> atom is unique across all plugins</li></ul>
 
 </div>
 
@@ -196,11 +196,11 @@ Plugin Observability
       <p>
 
           <span class="line">
-            <a href="https://hex.pm/packages/hecate_sdk/0.6.1" class="footer-hex-package">Hex Package</a>
+            <a href="https://hex.pm/packages/hecate_sdk/0.6.2" class="footer-hex-package">Hex Package</a>
 
-            <a href="https://preview.hex.pm/preview/hecate_sdk/0.6.1">Hex Preview</a>
+            <a href="https://preview.hex.pm/preview/hecate_sdk/0.6.2">Hex Preview</a>
 
-              (<a href="https://preview.hex.pm/preview/hecate_sdk/0.6.1/show/guides/packaging.md">current file</a>)
+              (<a href="https://preview.hex.pm/preview/hecate_sdk/0.6.2/show/guides/packaging.md">current file</a>)
 
           </span>
 
