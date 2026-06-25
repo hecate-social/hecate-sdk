@@ -19,20 +19,8 @@ desk(#{subject := Subject} = Opts) ->
     TestDir = maps:get(test_dir, Opts, replace_src_with_test(OutDir)),
     Type = maps:get(type, Opts, page),
     Plural = pluralize(s(Subject)),
-    {DeskName, ApiMod, _ApiPath, Template, TestTpl} = case Type of
-        page ->
-            DN = "get_" ++ Plural ++ "_page",
-            AM = DN ++ "_api",
-            {DN, AM, "/api/" ++ Plural,
-             fun() -> tpl_qry_page_api(AM, Plural) end,
-             fun() -> tpl_qry_page_tests(AM, Plural) end};
-        by_id ->
-            DN = "get_" ++ s(Subject) ++ "_by_id",
-            AM = DN ++ "_api",
-            {DN, AM, "/api/" ++ Plural ++ "/:id",
-             fun() -> tpl_qry_by_id_api(AM, s(Subject)) end,
-             fun() -> tpl_qry_by_id_tests(AM, s(Subject)) end}
-    end,
+    {DeskName, ApiMod, _ApiPath, Template, TestTpl} =
+        qry_codegen_spec(Type, Subject, Plural),
     DeskDir = filename:join(OutDir, DeskName),
 
     Files = [
@@ -40,6 +28,19 @@ desk(#{subject := Subject} = Opts) ->
         {filename:join(TestDir, ApiMod ++ "_tests.erl"), TestTpl()}
     ],
     write_files(Files).
+
+qry_codegen_spec(page, _Subject, Plural) ->
+    DN = "get_" ++ Plural ++ "_page",
+    AM = DN ++ "_api",
+    {DN, AM, "/api/" ++ Plural,
+     fun() -> tpl_qry_page_api(AM, Plural) end,
+     fun() -> tpl_qry_page_tests(AM, Plural) end};
+qry_codegen_spec(by_id, Subject, Plural) ->
+    DN = "get_" ++ s(Subject) ++ "_by_id",
+    AM = DN ++ "_api",
+    {DN, AM, "/api/" ++ Plural ++ "/:id",
+     fun() -> tpl_qry_by_id_api(AM, s(Subject)) end,
+     fun() -> tpl_qry_by_id_tests(AM, s(Subject)) end}.
 
 %% ===================================================================
 %% Templates

@@ -32,29 +32,30 @@
 -spec check(Input :: map(), Rules :: [rule()]) ->
     {ok, map()} | {error, [error()]}.
 check(Input, Rules) ->
-    {Validated, Errors} = lists:foldl(fun(Rule, {Acc, Errs}) ->
-        case check_rule(Input, Rule) of
-            {ok, Key, Value} -> {Acc#{Key => Value}, Errs};
-            {error, Err}     -> {Acc, [Err | Errs]}
-        end
-    end, {#{}, []}, Rules),
-    case Errors of
-        [] -> {ok, Validated};
-        _  -> {error, lists:reverse(Errors)}
-    end.
+    {Validated, Errors} =
+        lists:foldl(fun(Rule, Acc) -> apply_rule(check_rule(Input, Rule), Acc) end,
+                    {#{}, []}, Rules),
+    check_result(Errors, Validated).
+
+apply_rule({ok, Key, Value}, {Acc, Errs}) -> {Acc#{Key => Value}, Errs};
+apply_rule({error, Err}, {Acc, Errs}) -> {Acc, [Err | Errs]}.
+
+check_result([], Validated) -> {ok, Validated};
+check_result(Errors, _Validated) -> {error, lists:reverse(Errors)}.
 
 %% @doc Require a key exists in a map. Returns value or error.
 -spec require(map(), atom()) -> {ok, term()} | {error, {atom(), binary()}}.
 require(Map, Key) ->
     BinKey = atom_to_binary(Key),
-    case maps:find(BinKey, Map) of
-        {ok, Value} -> {ok, Value};
-        error ->
-            case maps:find(Key, Map) of
-                {ok, Value} -> {ok, Value};
-                error -> {error, {Key, <<"required">>}}
-            end
-    end.
+    require_found(maps:find(BinKey, Map), Map, Key).
+
+require_found({ok, Value}, _Map, _Key) ->
+    {ok, Value};
+require_found(error, Map, Key) ->
+    require_atom_key(maps:find(Key, Map), Key).
+
+require_atom_key({ok, Value}, _Key) -> {ok, Value};
+require_atom_key(error, Key) -> {error, {Key, <<"required">>}}.
 
 %% @doc Require a binary value.
 -spec require_binary(map(), atom()) -> {ok, binary()} | {error, {atom(), binary()}}.
@@ -80,24 +81,26 @@ require_integer(Map, Key) ->
 
 check_rule(Input, {Key, required, Type}) ->
     BinKey = atom_to_binary(Key),
-    case maps:find(BinKey, Input) of
-        {ok, Value} -> validate_type(Key, Value, Type);
-        error ->
-            case maps:find(Key, Input) of
-                {ok, Value} -> validate_type(Key, Value, Type);
-                error -> {error, {Key, <<"is required">>}}
-            end
-    end;
+    required_bin(maps:find(BinKey, Input), Input, Key, Type);
 check_rule(Input, {Key, optional, Type, Default}) ->
     BinKey = atom_to_binary(Key),
-    case maps:find(BinKey, Input) of
-        {ok, Value} -> validate_type(Key, Value, Type);
-        error ->
-            case maps:find(Key, Input) of
-                {ok, Value} -> validate_type(Key, Value, Type);
-                error -> {ok, Key, Default}
-            end
-    end.
+    optional_bin(maps:find(BinKey, Input), Input, Key, Type, Default).
+
+required_bin({ok, Value}, _Input, Key, Type) ->
+    validate_type(Key, Value, Type);
+required_bin(error, Input, Key, Type) ->
+    required_atom(maps:find(Key, Input), Key, Type).
+
+required_atom({ok, Value}, Key, Type) -> validate_type(Key, Value, Type);
+required_atom(error, Key, _Type) -> {error, {Key, <<"is required">>}}.
+
+optional_bin({ok, Value}, _Input, Key, Type, _Default) ->
+    validate_type(Key, Value, Type);
+optional_bin(error, Input, Key, Type, Default) ->
+    optional_atom(maps:find(Key, Input), Key, Type, Default).
+
+optional_atom({ok, Value}, Key, Type, _Default) -> validate_type(Key, Value, Type);
+optional_atom(error, Key, _Type, Default) -> {ok, Key, Default}.
 
 validate_type(Key, Value, binary) when is_binary(Value) ->
     {ok, Key, Value};
@@ -112,10 +115,8 @@ validate_type(Key, Value, atom) when is_atom(Value) ->
 validate_type(Key, Value, any) ->
     {ok, Key, Value};
 validate_type(Key, Value, {list, InnerType}) when is_list(Value) ->
-    case lists:all(fun(V) -> type_matches(V, InnerType) end, Value) of
-        true  -> {ok, Key, Value};
-        false -> {error, {Key, <<"list items have wrong type">>}}
-    end;
+    AllMatch = lists:all(fun(V) -> type_matches(V, InnerType) end, Value),
+    validate_list_result(AllMatch, Key, Value);
 validate_type(Key, Value, {one_of, Allowed}) ->
     case lists:member(Value, Allowed) of
         true  -> {ok, Key, Value};
@@ -126,6 +127,11 @@ validate_type(Key, Value, {one_of, Allowed}) ->
 validate_type(Key, _Value, Type) ->
     TypeBin = iolist_to_binary(io_lib:format("~p", [Type])),
     {error, {Key, <<"must be ", TypeBin/binary>>}}.
+
+validate_list_result(true, Key, Value) ->
+    {ok, Key, Value};
+validate_list_result(false, Key, _Value) ->
+    {error, {Key, <<"list items have wrong type">>}}.
 
 type_matches(V, binary)  -> is_binary(V);
 type_matches(V, integer) -> is_integer(V);

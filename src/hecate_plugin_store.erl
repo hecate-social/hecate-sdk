@@ -71,15 +71,15 @@ start_extra_stores(BaseDataDir, StoreSpecs) ->
 %% and process managers. Call after stores are created.
 -spec start_subscriptions(StoreIds :: [atom()]) -> ok.
 start_subscriptions(StoreIds) ->
-    lists:foreach(fun(StoreId) ->
-        case evoq_store_subscription:start_link(StoreId) of
-            {ok, _Pid} ->
-                logger:info("[plugin-store] Subscription ready for ~p", [StoreId]);
-            {error, Reason} ->
-                logger:warning("[plugin-store] Subscription failed for ~p: ~p",
-                               [StoreId, Reason])
-        end
-    end, StoreIds).
+    lists:foreach(fun start_subscription/1, StoreIds).
+
+start_subscription(StoreId) ->
+    log_subscription(evoq_store_subscription:start_link(StoreId), StoreId).
+
+log_subscription({ok, _Pid}, StoreId) ->
+    logger:info("[plugin-store] Subscription ready for ~p", [StoreId]);
+log_subscription({error, Reason}, StoreId) ->
+    logger:warning("[plugin-store] Subscription failed for ~p: ~p", [StoreId, Reason]).
 
 %%--------------------------------------------------------------------
 %% Internal

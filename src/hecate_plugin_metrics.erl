@@ -69,20 +69,19 @@ gauge(PluginName, MetricName, Value) ->
 get_all() ->
     case ets:info(?TABLE) of
         undefined -> [];
-        _ ->
-            ets:foldl(fun
-                ({{_Plugin, <<"__counters_ref__">>}, _Ref, _Slot, ref}, Acc) ->
-                    Acc;
-                ({{Plugin, Name}, _Ref, Slot, Type}, Acc) ->
-                    case get_counter_ref(Plugin) of
-                        undefined -> Acc;
-                        CRef ->
-                            Value = counters:get(CRef, Slot),
-                            [#{plugin => Plugin, name => Name,
-                               type => Type, value => Value} | Acc]
-                    end
-            end, [], ?TABLE)
+        _ -> ets:foldl(fun collect_metric/2, [], ?TABLE)
     end.
+
+collect_metric({{_Plugin, <<"__counters_ref__">>}, _Ref, _Slot, ref}, Acc) ->
+    Acc;
+collect_metric({{Plugin, Name}, _Ref, Slot, Type}, Acc) ->
+    metric_value(get_counter_ref(Plugin), Plugin, Name, Slot, Type, Acc).
+
+metric_value(undefined, _Plugin, _Name, _Slot, _Type, Acc) ->
+    Acc;
+metric_value(CRef, Plugin, Name, Slot, Type, Acc) ->
+    Value = counters:get(CRef, Slot),
+    [#{plugin => Plugin, name => Name, type => Type, value => Value} | Acc].
 
 %%--------------------------------------------------------------------
 %% @doc Get all metrics for a specific plugin.
@@ -92,22 +91,22 @@ get_all() ->
 get_plugin(PluginName) ->
     case ets:info(?TABLE) of
         undefined -> [];
-        _ ->
-            case get_counter_ref(PluginName) of
-                undefined -> [];
-                CRef ->
-                    ets:foldl(fun
-                        ({{P, <<"__counters_ref__">>}, _, _, ref}, Acc) when P =:= PluginName ->
-                            Acc;
-                        ({{P, Name}, _, Slot, Type}, Acc) when P =:= PluginName ->
-                            Value = counters:get(CRef, Slot),
-                            [#{plugin => PluginName, name => Name,
-                               type => Type, value => Value} | Acc];
-                        (_, Acc) ->
-                            Acc
-                    end, [], ?TABLE)
-            end
+        _ -> get_plugin_metrics(get_counter_ref(PluginName), PluginName)
     end.
+
+get_plugin_metrics(undefined, _PluginName) ->
+    [];
+get_plugin_metrics(CRef, PluginName) ->
+    ets:foldl(fun(E, Acc) -> collect_plugin_metric(E, PluginName, CRef, Acc) end,
+              [], ?TABLE).
+
+collect_plugin_metric({{P, <<"__counters_ref__">>}, _, _, ref}, P, _CRef, Acc) ->
+    Acc;
+collect_plugin_metric({{P, Name}, _, Slot, Type}, P, CRef, Acc) ->
+    Value = counters:get(CRef, Slot),
+    [#{plugin => P, name => Name, type => Type, value => Value} | Acc];
+collect_plugin_metric(_, _PluginName, _CRef, Acc) ->
+    Acc.
 
 %%--------------------------------------------------------------------
 %% @doc Remove all metrics for a plugin.
@@ -117,17 +116,20 @@ get_plugin(PluginName) ->
 cleanup(PluginName) ->
     case ets:info(?TABLE) of
         undefined -> ok;
-        _ ->
-            %% Collect keys to delete, then delete them
-            Keys = ets:foldl(fun
-                ({{P, Name}, _, _, _}, Acc) when P =:= PluginName ->
-                    [{P, Name} | Acc];
-                (_, Acc) ->
-                    Acc
-            end, [], ?TABLE),
-            lists:foreach(fun(Key) -> ets:delete(?TABLE, Key) end, Keys),
-            ok
+        _ -> cleanup_plugin(PluginName)
     end.
+
+cleanup_plugin(PluginName) ->
+    %% Collect keys to delete, then delete them
+    Keys = ets:foldl(fun(E, Acc) -> collect_plugin_key(E, PluginName, Acc) end,
+                     [], ?TABLE),
+    lists:foreach(fun(Key) -> ets:delete(?TABLE, Key) end, Keys),
+    ok.
+
+collect_plugin_key({{P, Name}, _, _, _}, P, Acc) ->
+    [{P, Name} | Acc];
+collect_plugin_key(_, _PluginName, Acc) ->
+    Acc.
 
 %%====================================================================
 %% Internal

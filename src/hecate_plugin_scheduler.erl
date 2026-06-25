@@ -50,17 +50,20 @@ cancel(Ref) ->
 schedule_loop(Ref, IntervalMs, Fun, Name) ->
     receive
         {run, Ref} ->
-            case get({scheduler_cancel, Ref}) of
-                true ->
-                    ok;
-                _ ->
-                    try Fun()
-                    catch
-                        Class:Reason:Stack ->
-                            logger:error("[scheduler] Task ~p failed: ~p:~p~n~p",
-                                         [Name, Class, Reason, Stack])
-                    end,
-                    erlang:send_after(IntervalMs, self(), {run, Ref}),
-                    schedule_loop(Ref, IntervalMs, Fun, Name)
-            end
+            schedule_run(get({scheduler_cancel, Ref}), Ref, IntervalMs, Fun, Name)
+    end.
+
+schedule_run(true, _Ref, _IntervalMs, _Fun, _Name) ->
+    ok;
+schedule_run(_, Ref, IntervalMs, Fun, Name) ->
+    run_scheduled(Fun, Name),
+    erlang:send_after(IntervalMs, self(), {run, Ref}),
+    schedule_loop(Ref, IntervalMs, Fun, Name).
+
+run_scheduled(Fun, Name) ->
+    try Fun()
+    catch
+        Class:Reason:Stack ->
+            logger:error("[scheduler] Task ~p failed: ~p:~p~n~p",
+                         [Name, Class, Reason, Stack])
     end.

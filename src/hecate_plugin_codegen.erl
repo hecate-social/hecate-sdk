@@ -165,19 +165,20 @@ sdk_version() -> ?HECATE_SDK_VERSION.
 %% Write files, skip existing, create directories
 -spec write_files([{string(), string()}]) -> {ok, [string()]}.
 write_files(Files) ->
-    Written = lists:filtermap(fun({Path, Content}) ->
-        case filelib:is_regular(Path) of
-            true ->
-                logger:info("[codegen] Skipping existing: ~s", [Path]),
-                false;
-            false ->
-                ok = filelib:ensure_dir(Path),
-                ok = file:write_file(Path, Content),
-                logger:info("[codegen] Generated: ~s", [Path]),
-                {true, Path}
-        end
-    end, Files),
+    Written = lists:filtermap(fun write_one_file/1, Files),
     {ok, Written}.
+
+write_one_file({Path, Content}) ->
+    write_if_absent(filelib:is_regular(Path), Path, Content).
+
+write_if_absent(true, Path, _Content) ->
+    logger:info("[codegen] Skipping existing: ~s", [Path]),
+    false;
+write_if_absent(false, Path, Content) ->
+    ok = filelib:ensure_dir(Path),
+    ok = file:write_file(Path, Content),
+    logger:info("[codegen] Generated: ~s", [Path]),
+    {true, Path}.
 
 %% Format template string
 -spec fmt(string(), [term()]) -> string().
@@ -239,14 +240,17 @@ subject_from_cmd(CmdMod) ->
 %% Naive pluralization
 -spec pluralize(string()) -> string().
 pluralize(Word) ->
-    case lists:suffix("s", Word) of
-        true -> Word ++ "es";
-        false ->
-            case lists:suffix("y", Word) of
-                true -> lists:sublist(Word, length(Word) - 1) ++ "ies";
-                false -> Word ++ "s"
-            end
-    end.
+    pluralize_s(lists:suffix("s", Word), Word).
+
+pluralize_s(true, Word) ->
+    Word ++ "es";
+pluralize_s(false, Word) ->
+    pluralize_y(lists:suffix("y", Word), Word).
+
+pluralize_y(true, Word) ->
+    lists:sublist(Word, length(Word) - 1) ++ "ies";
+pluralize_y(false, Word) ->
+    Word ++ "s".
 
 %% Replace /src/ with /test/ in a path
 -spec replace_src_with_test(string()) -> string().

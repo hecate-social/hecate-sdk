@@ -37,29 +37,28 @@ new(Name, MaxTokens, WindowMs) ->
 check(Name, Key) ->
     Tab = ensure_table(),
     Now = erlang:monotonic_time(millisecond),
-    case ets:lookup(Tab, {config, Name}) of
-        [{{config, Name}, MaxTokens, WindowMs}] ->
-            BucketKey = {bucket, Name, Key},
-            case ets:lookup(Tab, BucketKey) of
-                [{BucketKey, Tokens, LastRefill}] ->
-                    Elapsed = Now - LastRefill,
-                    Refilled = min(MaxTokens,
-                                   Tokens + (Elapsed * MaxTokens div WindowMs)),
-                    case Refilled > 0 of
-                        true ->
-                            ets:insert(Tab, {BucketKey, Refilled - 1, Now}),
-                            ok;
-                        false ->
-                            RetryAfter = WindowMs - Elapsed,
-                            {error, max(1, RetryAfter)}
-                    end;
-                [] ->
-                    ets:insert(Tab, {BucketKey, MaxTokens - 1, Now}),
-                    ok
-            end;
-        [] ->
-            ok  %% No config = no limit
-    end.
+    check_config(ets:lookup(Tab, {config, Name}), Tab, Name, Key, Now).
+
+check_config([{{config, Name}, MaxTokens, WindowMs}], Tab, Name, Key, Now) ->
+    BucketKey = {bucket, Name, Key},
+    check_bucket(ets:lookup(Tab, BucketKey), Tab, BucketKey, MaxTokens, WindowMs, Now);
+check_config([], _Tab, _Name, _Key, _Now) ->
+    ok.  %% No config = no limit
+
+check_bucket([{BucketKey, Tokens, LastRefill}], Tab, BucketKey, MaxTokens, WindowMs, Now) ->
+    Elapsed = Now - LastRefill,
+    Refilled = min(MaxTokens, Tokens + (Elapsed * MaxTokens div WindowMs)),
+    check_refilled(Refilled > 0, Tab, BucketKey, Refilled, WindowMs, Elapsed, Now);
+check_bucket([], Tab, BucketKey, MaxTokens, _WindowMs, Now) ->
+    ets:insert(Tab, {BucketKey, MaxTokens - 1, Now}),
+    ok.
+
+check_refilled(true, Tab, BucketKey, Refilled, _WindowMs, _Elapsed, Now) ->
+    ets:insert(Tab, {BucketKey, Refilled - 1, Now}),
+    ok;
+check_refilled(false, _Tab, _BucketKey, _Refilled, WindowMs, Elapsed, _Now) ->
+    RetryAfter = WindowMs - Elapsed,
+    {error, max(1, RetryAfter)}.
 
 %% @doc Reset rate limit for a specific key.
 -spec reset(Name :: atom(), Key :: term()) -> ok.

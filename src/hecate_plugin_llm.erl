@@ -208,14 +208,16 @@ classify_by_params(_Family, ParamSize) ->
 -spec parse_param_billions(binary()) -> float().
 parse_param_billions(Bin) ->
     Str = string:uppercase(binary_to_list(Bin)),
-    case string:split(Str, "B") of
-        [NumStr | _] ->
-            try list_to_float(NumStr)
-            catch error:badarg ->
-                try float(list_to_integer(NumStr))
-                catch error:badarg -> 7.0
-                end
-            end;
-        _ ->
-            7.0
+    parse_param_split(string:split(Str, "B")).
+
+parse_param_split([NumStr | _]) ->
+    try list_to_float(NumStr)
+    catch error:badarg -> parse_param_int(NumStr)
+    end;
+parse_param_split(_) ->
+    7.0.
+
+parse_param_int(NumStr) ->
+    try float(list_to_integer(NumStr))
+    catch error:badarg -> 7.0
     end.

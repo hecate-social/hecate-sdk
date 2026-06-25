@@ -76,31 +76,33 @@ bump_version(#{version := Version, output_dir := Dir} = Opts) ->
     end,
     %% Update rebar.config release version
     RebarConfig = filename:join(Dir, "rebar.config"),
-    case filelib:is_regular(RebarConfig) of
-        true ->
-            update_file(RebarConfig,
-                        "{release, \\{[^,]*, \"[^\"]*\"\\}",
-                        fun(Match) ->
-                            re:replace(Match, "\"[^\"]*\"\\}", "\"" ++ Vsn ++ "\"}", [{return, list}])
-                        end);
-        false -> ok
-    end,
+    bump_rebar_version(filelib:is_regular(RebarConfig), RebarConfig, Vsn),
     %% Append to CHANGELOG.md
-    case Changelog of
-        "" -> ok;
-        _ ->
-            ChangelogPath = filename:join(Dir, "CHANGELOG.md"),
-            Entry = io_lib:format("\n## ~s\n\n- ~s\n", [Vsn, Changelog]),
-            case filelib:is_regular(ChangelogPath) of
-                true ->
-                    {ok, Old} = file:read_file(ChangelogPath),
-                    ok = file:write_file(ChangelogPath, [Old, Entry]);
-                false ->
-                    Header = io_lib:format("# Changelog\n~s", [Entry]),
-                    ok = file:write_file(ChangelogPath, Header)
-            end
-    end,
+    append_changelog(Changelog, Dir, Vsn),
     ok.
+
+bump_rebar_version(false, _RebarConfig, _Vsn) ->
+    ok;
+bump_rebar_version(true, RebarConfig, Vsn) ->
+    update_file(RebarConfig,
+                "{release, \\{[^,]*, \"[^\"]*\"\\}",
+                fun(Match) ->
+                    re:replace(Match, "\"[^\"]*\"\\}", "\"" ++ Vsn ++ "\"}", [{return, list}])
+                end).
+
+append_changelog("", _Dir, _Vsn) ->
+    ok;
+append_changelog(Changelog, Dir, Vsn) ->
+    ChangelogPath = filename:join(Dir, "CHANGELOG.md"),
+    Entry = io_lib:format("\n## ~s\n\n- ~s\n", [Vsn, Changelog]),
+    write_changelog(filelib:is_regular(ChangelogPath), ChangelogPath, Entry).
+
+write_changelog(true, ChangelogPath, Entry) ->
+    {ok, Old} = file:read_file(ChangelogPath),
+    ok = file:write_file(ChangelogPath, [Old, Entry]);
+write_changelog(false, ChangelogPath, Entry) ->
+    Header = io_lib:format("# Changelog\n~s", [Entry]),
+    ok = file:write_file(ChangelogPath, Header).
 
 %% ===================================================================
 %% CI workflow template
@@ -296,16 +298,17 @@ update_file(Path, Pattern, Replacement) when is_list(Replacement) ->
         _ -> ok
     end;
 update_file(Path, Pattern, ReplaceFun) when is_function(ReplaceFun, 1) ->
-    case file:read_file(Path) of
-        {ok, Content} ->
-            case re:run(Content, Pattern, [{capture, first, list}]) of
-                {match, [Match]} ->
-                    Replaced = ReplaceFun(Match),
-                    Updated = binary:replace(Content,
-                                           list_to_binary(Match),
-                                           list_to_binary(Replaced)),
-                    ok = file:write_file(Path, Updated);
-                nomatch -> ok
-            end;
-        _ -> ok
-    end.
+    update_file_fun(file:read_file(Path), Path, Pattern, ReplaceFun).
+
+update_file_fun({ok, Content}, Path, Pattern, ReplaceFun) ->
+    apply_replace_fun(re:run(Content, Pattern, [{capture, first, list}]),
+                      Content, Path, ReplaceFun);
+update_file_fun(_, _Path, _Pattern, _ReplaceFun) ->
+    ok.
+
+apply_replace_fun({match, [Match]}, Content, Path, ReplaceFun) ->
+    Replaced = ReplaceFun(Match),
+    Updated = binary:replace(Content, list_to_binary(Match), list_to_binary(Replaced)),
+    ok = file:write_file(Path, Updated);
+apply_replace_fun(nomatch, _Content, _Path, _ReplaceFun) ->
+    ok.
