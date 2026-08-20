@@ -3,3 +3,5 @@ _checkouts/
 .rebar3/
 erl_crash.dump
 rebar3.crashdump
+mix.lock
+rebar.lock
