@@ -18,6 +18,6 @@
     {env, []},
     {licenses, ["Apache-2.0"]},
     {links, [
-        {"Codeberg", "https://codeberg.org/hecate-social/hecate-sdk"}
+        {"GitHub", "https://github.com/hecate-social/hecate-sdk"}
     ]}
 ]}.
